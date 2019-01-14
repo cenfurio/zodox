@@ -1,0 +1,62 @@
+import { Type, Omit } from "../../common";
+import { Provider } from "../di";
+import { ServerRoute, RouteOptions } from "hapi";
+
+export interface ControllerSummary {
+    type: Type<any>;
+    providers: ReadonlyArray<Provider>;
+    routes: ReadonlyArray<[string, RouteMetadata]>;
+}
+
+export class ControllerMetadata {
+    private type: Type<any>;
+    private providers: Provider[] = [];
+    private routes = new Map<string, RouteMetadata>();
+
+    constructor(type: Type<any>) {
+        this.type = type;
+    }
+
+    addProvider(provider: Provider) {
+        this.providers.push(provider);
+    }
+
+    addRoute(propKey: string, route: RouteMetadata) {
+        if(!this.routes.has(propKey)) {
+            this.routes.set(propKey, route);
+        }
+    }
+
+    addRouteOptions(propKey: string, options: RouteOptions) {
+        if(this.routes.has(propKey)) {
+            const route = this.routes.get(propKey)!;
+
+            // TODO: Merge them together properly...
+            this.routes.set(propKey, {
+                ...route,
+                options: {
+                    ...route.options,
+                    ...options
+                }
+            });
+        }
+    }
+
+    toSummary(): ControllerSummary {
+        const routes: [string, RouteMetadata][] = [];
+
+        this.routes.forEach((route, propName) => {
+            routes.push([propName, route]);
+        });
+
+        return {
+            type: this.type,
+            providers: this.providers,
+            routes
+        }
+    }
+}
+
+
+export interface RouteMetadata extends Omit<ServerRoute, "handler"> {
+}

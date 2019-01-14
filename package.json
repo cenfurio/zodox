@@ -1,0 +1,32 @@
+{
+  "name": "@cenfurio/zodox",
+  "version": "0.1.0",
+  "description": "A framework to build RESTful APIs with Hapi",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "keywords": [
+    "hapi",
+    "angular",
+    "metadata",
+    "decorators",
+    "di"
+  ],
+  "author": "Paul Hobbel <hello@paulhobbel.me>",
+  "license": "GPL-3.0",
+  "engines": {
+    "node": ">=10.11.0"
+  },
+  "devDependencies": {
+    "@types/hapi": "^17.8.2",
+    "@types/node": "^10.12.17",
+    "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.12",
+    "hapi": "^17.8.1"
+  }
+}

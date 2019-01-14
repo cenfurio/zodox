@@ -1,0 +1,21 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+.git/
+.gitignore
+.editorconfig
+tsconfig.json
+
+# Dependency directories
+node_modules/
+
+# Source code
+src/
+
+# Tests
+tests/
