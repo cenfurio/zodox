@@ -8,18 +8,16 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
-  "keywords": [
-    "hapi",
-    "angular",
-    "metadata",
-    "decorators",
-    "di"
-  ],
+  "repository": {
+    "type" : "git",
+    "url" : "git+https://github.com/cenfurio/zodox.git"
+  },
   "author": "Paul Hobbel <hello@paulhobbel.me>",
   "license": "GPL-3.0",
-  "engines": {
-    "node": ">=10.11.0"
+  "bugs": {
+    "url": "https://github.com/cenfurio/zodox/issues"
   },
+  "homepage": "https://github.com/cenfurio/zodox#readme",
   "devDependencies": {
     "@types/hapi": "^17.8.2",
     "@types/node": "^10.12.17",
@@ -28,5 +26,15 @@
   "dependencies": {
     "hapi": "^17.8.1",
     "reflect-metadata": "^0.1.12"
-  }
+  },
+  "engines": {
+    "node": ">=10.11.0"
+  },
+  "keywords": [
+    "hapi",
+    "angular",
+    "metadata",
+    "decorators",
+    "di"
+  ]
 }
