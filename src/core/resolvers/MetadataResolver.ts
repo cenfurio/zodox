@@ -1,4 +1,4 @@
-import { Type, Reflector, NoAnnotationError, AnnotationDescriptor,  } from "../../common";
+import { Type, Reflector, NoAnnotationError, AnnotationDescriptor, InvalidPathError,  } from "../../common";
 
 import { ModuleMetadata, ControllerMetadata, ModuleSummary, ControllerSummary } from "../metadata";
 import { Injectable, Module, Controller, Route } from '../annotations';
@@ -153,6 +153,14 @@ export class MetadataResolver {
         Object.keys(propAnnotations).forEach(propKey => {
             propAnnotations[propKey].forEach(propAnnotation => {
                 if(propAnnotation instanceof Route) {
+                    if(!propAnnotation.path.startsWith('/')) {
+                        throw new InvalidPathError(propAnnotation.path);
+                    }
+
+                    if(propAnnotation.path.length === 1) { // AKA, only a /
+                        propAnnotation.path = '';
+                    }
+
                     metadata.addRoute(propKey, {
                         ...propAnnotation,
                         path: annotation.path + propAnnotation.path
