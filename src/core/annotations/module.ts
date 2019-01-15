@@ -1,7 +1,8 @@
-//import { ServerRegisterPluginObject } from "hapi";
+import { ServerRegisterPluginObject } from "hapi";
 import { makeDecorator, Type } from "../../common";
 
 import { Provider } from "../di";
+import { ServerAuthConfig } from "hapi";
 
 //register<T>(plugin: ServerRegisterPluginObject<T>, options?: ServerRegisterOptions): Promise<void>;
 /* tslint:disable-next-line:no-unnecessary-generics */
@@ -10,7 +11,34 @@ import { Provider } from "../di";
 /* tslint:disable-next-line:unified-signatures */
 //register(plugins: Plugin<any> | Array<Plugin<any>>, options?: ServerRegisterOptions): Promise<void>;
 
-//type Plugin = ServerRegisterPluginObject<any> | Array<ServerRegisterPluginObject<any>>;
+export interface ModuleAuthStrategy<T> {
+    /**
+     * The strategy name
+     */
+    name: string;
+
+    /**
+     * The scheme name
+     */
+    scheme: string;
+
+    /**
+     * The scheme options based on the scheme requirements
+     */
+    options?: T
+}
+
+export interface ModuleAuth {
+    /**
+     * Set of authentication strategies to be registered
+     */
+    strategies?: ModuleAuthStrategy<any>[];
+
+    /**
+     * Sets a default strategy which is applied to every route
+     */
+    default?: string | ServerAuthConfig;
+}
 
 export interface Module {
     /**
@@ -30,7 +58,14 @@ export interface Module {
      */
     imports?: Type<any>[];
 
-    //plugins?: Plugin[];
+    /**
+     * Specify the auth configuration
+     * 
+     * NOTE: This is only allowed in your MainModule
+     */
+    auth?: ModuleAuth;
+
+    plugins?: ServerRegisterPluginObject<any>[];
 }
 
 export const Module = makeDecorator(null, (module: Module) => module);

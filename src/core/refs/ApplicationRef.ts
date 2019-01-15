@@ -22,6 +22,25 @@ export class ApplicationRef {
         const moduleFactory = new ModuleFactory(this.resolver.getModuleSummary(module));
         const moduleRef = moduleFactory.create(this.injector);
 
+        // FIXME: This really is just a temp fix, should be done in a more proper way
+        if(moduleRef.plugins) {
+            await asyncForEach(moduleRef.plugins, async (plugin) => {
+                await this.server.register(plugin);
+            });
+        }
+
+        if(moduleRef.auth) {
+            if(moduleRef.auth.strategies) {
+                await asyncForEach(moduleRef.auth.strategies, async (strategy) => {
+                    this.server.auth.strategy(strategy.name, strategy.scheme, strategy.options);
+                });
+            }
+
+            if(moduleRef.auth.default) {
+                this.server.auth.default(moduleRef.auth.default);
+            }
+        }
+
         await asyncForEach(moduleFactory.controllers, async (controller) => {
             const controllerFactory = new ControllerFactory(this.resolver.getControllerSummary(controller));
 

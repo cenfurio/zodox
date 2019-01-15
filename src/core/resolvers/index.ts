@@ -1,1 +1,1 @@
-export { MetadataResolver } from './MetadataResolver';
+export { MetadataResolver, MODULE_AUTH_CONFIG, MODULE_PLUGINS } from './MetadataResolver';

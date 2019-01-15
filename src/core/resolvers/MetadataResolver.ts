@@ -1,7 +1,14 @@
 import { Type, Reflector, NoAnnotationError, AnnotationDescriptor, InvalidPathError,  } from "../../common";
 
 import { ModuleMetadata, ControllerMetadata, ModuleSummary, ControllerSummary } from "../metadata";
-import { Injectable, Module, Controller, Route, Auth, Validate, Payload, RouteOption } from '../annotations';
+import { Injectable, Module, Controller, Route, RouteOption, ModuleAuth } from '../annotations';
+import { InjectionToken } from "../di";
+import { ServerRegisterPluginObject } from "hapi";
+
+// FIXME: Remove the need of these
+// @internal
+export const MODULE_AUTH_CONFIG = new InjectionToken<ModuleAuth>('module auth');
+export const MODULE_PLUGINS = new InjectionToken<ServerRegisterPluginObject<any>[]>('module plugins');
 
 @Injectable()
 export class MetadataResolver {
@@ -112,6 +119,22 @@ export class MetadataResolver {
 
                 metadata.addController(controller);
             })
+        }
+
+        // TODO: Only allow this in the MainModule
+        if(annotation.auth) {
+            metadata.addProvider({
+                provide: MODULE_AUTH_CONFIG,
+                useValue: annotation.auth
+            });
+        }
+
+        // TODO: Only allow this in the MainModule
+        if(annotation.plugins) {
+            metadata.addProvider({
+                provide: MODULE_PLUGINS,
+                useValue: annotation.plugins
+            });
         }
 
         if(annotation.providers) {
