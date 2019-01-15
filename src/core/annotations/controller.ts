@@ -1,8 +1,7 @@
-import { ServerRoute, Util } from "hapi";
+import { ServerRoute, Util, RouteOptions, RouteOptionsAccess, RouteOptionsValidate, RouteOptionsPayload } from "hapi";
 import { Provider } from "../di";
 
 import { makeDecorator, makePropDecorator, Omit } from "../../common";
-import { string } from "joi";
 
 export interface ControllerOptions {
     /**
@@ -18,20 +17,41 @@ export interface ControllerOptions {
     providers?: Provider[]
 }
 
-export const Controller = makeDecorator((options: ControllerOptions) => options);
+export const Controller = makeDecorator(null, (options: ControllerOptions) => options);
 
-export interface RouteOptions extends Omit<ServerRoute, 'handler'>{
+export interface RouteConfig extends Omit<ServerRoute, 'handler'>{
     method: Util.HTTP_METHODS_PARTIAL | Util.HTTP_METHODS_PARTIAL[]
 }
 
-export const Route = makePropDecorator((options: RouteOptions) => options);
+/**
+ * Marks a property as Route.
+ */
+export const Route = makePropDecorator(null, (options: RouteConfig) => options);
 
-function makeMethodDecorator(method: Util.HTTP_METHODS_PARTIAL) {
-    return makePropDecorator((path: string) => ({ path, method }), Route);
+
+function makeRouteMethodDecorator(method: Util.HTTP_METHODS_PARTIAL) {
+    return makePropDecorator(Route, (path: string, options?: RouteOptions) => ({ path, method, options }));
 }
 
-export const Get = makeMethodDecorator('GET');
-export const Post = makeMethodDecorator('POST');
-export const Patch = makeMethodDecorator('PATCH');
-export const Put = makeMethodDecorator('PUT');
-export const Delete = makeMethodDecorator('DELETE');
+export const Get = makeRouteMethodDecorator('GET');
+export const Post = makeRouteMethodDecorator('POST');
+export const Patch = makeRouteMethodDecorator('PATCH');
+export const Put = makeRouteMethodDecorator('PUT');
+export const Delete = makeRouteMethodDecorator('DELETE');
+
+export const RouteOption = makePropDecorator(null, (options: RouteOptions) => options);
+
+/**
+ * Route authentication configuration.
+ */
+export const Auth = makePropDecorator(RouteOption, (auth: false | string | RouteOptionsAccess) => ({ auth }));
+
+/**
+ * Route payload configuration
+ */
+export const Payload = makePropDecorator(RouteOption, (payload: RouteOptionsPayload) => ({ payload }));
+
+/**
+ * Route validation configuration
+ */
+export const Validate = makePropDecorator(RouteOption, (validate: RouteOptionsValidate) => ({ validate }));

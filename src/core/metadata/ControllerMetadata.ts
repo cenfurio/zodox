@@ -28,18 +28,21 @@ export class ControllerMetadata {
     }
 
     addRouteOptions(propKey: string, options: RouteOptions) {
-        if(this.routes.has(propKey)) {
-            const route = this.routes.get(propKey)!;
-
-            // TODO: Merge them together properly...
-            this.routes.set(propKey, {
-                ...route,
-                options: {
-                    ...route.options,
-                    ...options
-                }
-            });
+        if(!this.routes.has(propKey)) {
+            // TODO: Make a better error
+            throw new Error('No route configuration specified');
         }
+        
+        const route = this.routes.get(propKey)!;
+
+        // TODO: Merge them together properly...
+        this.routes.set(propKey, {
+            ...route,
+            options: {
+                ...route.options,
+                ...options
+            }
+        });
     }
 
     toSummary(): ControllerSummary {

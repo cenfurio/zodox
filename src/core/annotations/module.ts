@@ -33,4 +33,4 @@ export interface Module {
     //plugins?: Plugin[];
 }
 
-export const Module = makeDecorator((module: Module) => module);
+export const Module = makeDecorator(null, (module: Module) => module);

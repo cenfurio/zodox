@@ -1,7 +1,7 @@
 import { Type, Reflector, NoAnnotationError, AnnotationDescriptor, InvalidPathError,  } from "../../common";
 
 import { ModuleMetadata, ControllerMetadata, ModuleSummary, ControllerSummary } from "../metadata";
-import { Injectable, Module, Controller, Route } from '../annotations';
+import { Injectable, Module, Controller, Route, Auth, Validate, Payload, RouteOption } from '../annotations';
 
 @Injectable()
 export class MetadataResolver {
@@ -165,6 +165,10 @@ export class MetadataResolver {
                         ...propAnnotation,
                         path: annotation.path + propAnnotation.path
                     })
+                }
+
+                if(propAnnotation instanceof RouteOption) {
+                    metadata.addRouteOptions(propKey, { ...propAnnotation });
                 }
             })
         });

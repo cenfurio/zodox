@@ -1,3 +1,3 @@
 export { Injectable, Inject, Self, SkipSelf, Optional } from './di';
-export { Controller, Route, Delete, Get, Patch, Post, Put } from './controller';
+export { Controller, Route, RouteOption, Delete, Get, Patch, Post, Put, Auth, Payload, Validate } from './controller';
 export { Module } from './module';

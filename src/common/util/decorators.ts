@@ -1,6 +1,8 @@
 import { ANNOTATIONS, PARAMETERS, PROP_METADATA } from "./Reflector";
 import { Type } from "../lang";
 
+type Props<T, R extends any[]> = (...args: R) => T;
+
 export interface ClassDecorator<T, R extends any[] = []> {
     (...args: R): (target: Type<any>) => Type<any>;
     new (...args: R): T;
@@ -18,10 +20,11 @@ export interface PropertyDecorator<T, R extends any[] = []> {
 
 /**
  * Creates a class decorator
+ * @param parent The parent decorator
  * @param props The props function
  */
 export function makeDecorator<T, R extends any[] = []>(
-    props?: (...args: R) => T, parent?: ClassDecorator<T, R>): ClassDecorator<T, R> {
+    parent: ClassDecorator<T, any> | null, props?: Props<T, R>): ClassDecorator<T, R> {
   
     const metaCtor = makeMetadataCtor(props);
 
@@ -51,10 +54,11 @@ export function makeDecorator<T, R extends any[] = []>(
 
 /**
  * Creates a param decorator
+ * @param parent The parent decorator
  * @param props The props function
  */
 export function makeParamDecorator<T, R extends any[] = []>(
-    props?: (...args: R) => T, parent?: ParameterDecorator<T, R>): ParameterDecorator<T, R> {
+    parent: ParameterDecorator<T, any> | null, props?: Props<T, R>): ParameterDecorator<T, R> {
 
     const metaCtor = makeMetadataCtor(props);
 
@@ -91,10 +95,11 @@ export function makeParamDecorator<T, R extends any[] = []>(
 
 /**
  * Creates a prop decorator
+ * @param parent The parent decorator
  * @param props The props function
  */
 export function makePropDecorator<T, R extends any[] = []>(
-    props?: (...args: R) => T, parent?: PropertyDecorator<any, any>): PropertyDecorator<T, R> {
+    parent: PropertyDecorator<T, any> | null, props?: Props<T, R>): PropertyDecorator<T, R> {
     
     const metaCtor = makeMetadataCtor(props);
 
