@@ -1,7 +1,8 @@
-import { ServerRoute } from "hapi";
+import { ServerRoute, Util } from "hapi";
 import { Provider } from "../di";
 
-import { makeDecorator, makePropDecorator } from "../../common";
+import { makeDecorator, makePropDecorator, Omit } from "../../common";
+import { string } from "joi";
 
 export interface ControllerOptions {
     /**
@@ -19,4 +20,18 @@ export interface ControllerOptions {
 
 export const Controller = makeDecorator((options: ControllerOptions) => options);
 
-export const route = makePropDecorator((options: ServerRoute) => options);
+export interface RouteOptions extends Omit<ServerRoute, 'handler'>{
+    method: Util.HTTP_METHODS_PARTIAL | Util.HTTP_METHODS_PARTIAL[]
+}
+
+export const Route = makePropDecorator((options: RouteOptions) => options);
+
+function makeMethodDecorator(method: Util.HTTP_METHODS_PARTIAL) {
+    return makePropDecorator((path: string) => ({ path, method }), Route);
+}
+
+export const Get = makeMethodDecorator('GET');
+export const Post = makeMethodDecorator('POST');
+export const Patch = makeMethodDecorator('PATCH');
+export const Put = makeMethodDecorator('PUT');
+export const Delete = makeMethodDecorator('DELETE');

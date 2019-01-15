@@ -6,6 +6,6 @@ export {
 
 export {
     Boot, ApplicationRef, ModuleRef, ControllerRef,
-    Module, Controller, route,
+    Module, Controller, Route, Put, Post, Patch, Get, Delete,
     Inject, Injectable, Optional, Self, SkipSelf,
     Injector, InjectionToken, Provider } from './core';

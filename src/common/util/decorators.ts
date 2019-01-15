@@ -21,7 +21,7 @@ export interface PropertyDecorator<T, R extends any[] = []> {
  * @param props The props function
  */
 export function makeDecorator<T, R extends any[] = []>(
-    props?: (...args: R) => T): ClassDecorator<T, R> {
+    props?: (...args: R) => T, parent?: ClassDecorator<T, R>): ClassDecorator<T, R> {
   
     const metaCtor = makeMetadataCtor(props);
 
@@ -42,6 +42,10 @@ export function makeDecorator<T, R extends any[] = []>(
         };
     }
 
+    if(parent) {
+        DecoratorFactory.prototype = Object.create(parent.prototype);
+    }
+
     return DecoratorFactory as any;
 }
 
@@ -50,7 +54,7 @@ export function makeDecorator<T, R extends any[] = []>(
  * @param props The props function
  */
 export function makeParamDecorator<T, R extends any[] = []>(
-    props?: (...args: R) => T): ParameterDecorator<T, R> {
+    props?: (...args: R) => T, parent?: ParameterDecorator<T, R>): ParameterDecorator<T, R> {
 
     const metaCtor = makeMetadataCtor(props);
 
@@ -78,6 +82,10 @@ export function makeParamDecorator<T, R extends any[] = []>(
         }
     }
 
+    if(parent) {
+        ParamDecoratorFactory.prototype = Object.create(parent.prototype);
+    }
+
     return ParamDecoratorFactory as any;
 }
 
@@ -86,7 +94,7 @@ export function makeParamDecorator<T, R extends any[] = []>(
  * @param props The props function
  */
 export function makePropDecorator<T, R extends any[] = []>(
-    props?: (...args: R) => T): PropertyDecorator<T, R> {
+    props?: (...args: R) => T, parent?: PropertyDecorator<any, any>): PropertyDecorator<T, R> {
     
     const metaCtor = makeMetadataCtor(props);
 
@@ -106,6 +114,10 @@ export function makePropDecorator<T, R extends any[] = []>(
 
             Reflect.defineMetadata(PROP_METADATA, props, target.constructor);
         };
+    }
+
+    if(parent) {
+        PropDecoratorFactory.prototype = Object.create(parent.prototype);
     }
 
     return PropDecoratorFactory as any;

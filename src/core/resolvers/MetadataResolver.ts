@@ -1,7 +1,7 @@
 import { Type, Reflector, NoAnnotationError, AnnotationDescriptor,  } from "../../common";
 
 import { ModuleMetadata, ControllerMetadata, ModuleSummary, ControllerSummary } from "../metadata";
-import { Injectable, Module, Controller, route } from '../annotations';
+import { Injectable, Module, Controller, Route } from '../annotations';
 
 @Injectable()
 export class MetadataResolver {
@@ -152,7 +152,7 @@ export class MetadataResolver {
         
         Object.keys(propAnnotations).forEach(propKey => {
             propAnnotations[propKey].forEach(propAnnotation => {
-                if(propAnnotation instanceof route) {
+                if(propAnnotation instanceof Route) {
                     metadata.addRoute(propKey, {
                         ...propAnnotation,
                         path: annotation.path + propAnnotation.path

@@ -1,6 +1,6 @@
 {
   "name": "@cenfurio/zodox",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A framework to build RESTful APIs with Hapi",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -9,8 +9,8 @@
     "build": "tsc"
   },
   "repository": {
-    "type" : "git",
-    "url" : "git+https://github.com/cenfurio/zodox.git"
+    "type": "git",
+    "url": "git+https://github.com/cenfurio/zodox.git"
   },
   "author": "Paul Hobbel <hello@paulhobbel.me>",
   "license": "GPL-3.0",
