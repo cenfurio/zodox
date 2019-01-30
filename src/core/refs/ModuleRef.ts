@@ -1,6 +1,9 @@
 import { Type, Destroyable } from "../../common";
 import { Injector } from "../di";
 import { MODULE_AUTH_CONFIG, MODULE_PLUGINS } from "../resolvers";
+import { ModuleSummary } from "../metadata";
+import { LifecylceFlag } from "../resolvers/LifecycleResolver";
+import { LifecycleService } from "../services/LifecycleService";
 
 export class ModuleRef implements Destroyable {
 
@@ -15,16 +18,38 @@ export class ModuleRef implements Destroyable {
         return this.injector.get(MODULE_PLUGINS);
     }
 
-    constructor(type: Type<any>, parentInjector: Injector) {
-        this.injector = Injector.resolveAndCreate([{
-            provide: ModuleRef,
-            useValue: this
-        }, type], parentInjector);
+    private destroyCallbacks: (() => void)[] | null = [];
 
-        this.instance = this.injector.get(type);
+    constructor(readonly summary: ModuleSummary, parentInjector: Injector) {
+
+        this.injector = Injector.resolveAndCreate([
+            ...this.summary.providers,
+            this.summary.type.reference,
+            {
+                provide: ModuleRef,
+                useValue: this
+            }, 
+        ], parentInjector);
+
+        this.instance = this.injector.get(this.summary.type.reference);
+
+        this.injector.get(LifecycleService)!.registerModule(this);
+        // if(this.summary.type.lifecycleFlags & LifecylceFlag.OnInit) {
+        //     this.instance.onInit();
+        // }
+    }
+
+    onDestroy(callback: () => void) {
+        if(this.destroyCallbacks) {
+            this.destroyCallbacks.push(callback);
+        }
     }
 
     destroy() {
-        // TODO: Actually destroy everything inside this module
+        if(this.destroyCallbacks) {
+            this.destroyCallbacks.forEach(callback => callback());
+            this.destroyCallbacks = null;
+        }
+        console.debug('[ModuleRef]: Destroyed');
     }
 }

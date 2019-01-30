@@ -139,6 +139,10 @@ export class Reflector {
         return result;
     }
 
+    static hasMethod(type: Type<any>, method: string) {
+        return method in type.prototype;
+    }
+
     /**
      * Checks whether the given type has the given annotation
      * @param type The type

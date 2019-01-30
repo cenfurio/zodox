@@ -10,6 +10,8 @@ export class ControllerRef implements Destroyable {
     readonly instance: any;
     readonly routes: ReadonlyArray<ServerRoute>;
 
+    private destroyCallbacks: (() => void)[] | null = [];
+
     constructor(type: Type<any>, routes: ReadonlyArray<[string, RouteMetadata]>, parentInjector: Injector) {
         this.injector = Injector.resolveAndCreate([{
             provide: ControllerRef,
@@ -24,7 +26,16 @@ export class ControllerRef implements Destroyable {
         }));
     }
 
-    destroy() {
+    onDestroy(callback: () => void) {
+        if(this.destroyCallbacks) {
+            this.destroyCallbacks.push(callback);
+        }
+    }
 
+    destroy() {
+        if(this.destroyCallbacks) {
+            this.destroyCallbacks.forEach(callback => callback());
+            this.destroyCallbacks = null;
+        }
     }
 }

@@ -1,3 +1,3 @@
-export { asyncForEach } from './arrays';
+export { asyncForEach, removeItem } from './arrays';
 export { ClassDecorator, ParameterDecorator, makeDecorator, makeParamDecorator, makePropDecorator } from './decorators';
 export { Reflector, ANNOTATIONS, PARAMETERS, PROP_METADATA } from './Reflector';

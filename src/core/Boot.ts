@@ -1,9 +1,10 @@
 import { ServerOptions, Server } from "hapi";
 
-import { MetadataResolver } from "./resolvers";
+import { MetadataResolver, LifecycleResolver } from "./resolvers";
 import { ApplicationRef } from "./refs";
 import { Injector } from "./di";
 import { InvalidStateError } from "../common";
+import { LifecycleService } from "./services/LifecycleService";
 
 export class Boot {
 
@@ -18,8 +19,10 @@ export class Boot {
                 useFactory: () => new Server(config),
                 deps: []
             },
+            LifecycleResolver,
             MetadataResolver,
-            ApplicationRef
+            ApplicationRef,
+            LifecycleService
         ]);
 
         const app = injector.get(ApplicationRef);

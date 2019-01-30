@@ -1,6 +1,6 @@
 {
   "name": "@cenfurio/zodox",
-  "version": "0.1.4",
+  "version": "0.1.4-1",
   "description": "A framework to build RESTful APIs with Hapi",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",

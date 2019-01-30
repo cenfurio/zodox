@@ -3,3 +3,13 @@ export async function asyncForEach<T>(array: T[]|ReadonlyArray<T>, callback: { (
         await callback(array[index], index, array);
     }
 }
+
+export function removeItem<T>(array: T[], item: T): boolean {
+    const index = array.indexOf(item);
+    if (index > -1) {
+        array.splice(index, 1);
+        return true;
+    }
+
+    return false;
+}

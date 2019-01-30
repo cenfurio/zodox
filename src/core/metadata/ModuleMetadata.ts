@@ -1,8 +1,9 @@
 import { Type } from "../../common";
 import { Provider } from "../di";
+import { TypeMetadata } from "./TypeMetadata";
 
 export interface ModuleSummary {
-    type: Type<any>;
+    type: TypeMetadata;
     modules: ReadonlyArray<Type<any>>;
     controllers: ReadonlyArray<Type<any>>;
     // providers: ReadonlyMap<Type<any>, ReadonlySet<Provider>>;
@@ -10,13 +11,13 @@ export interface ModuleSummary {
 }
 
 export class ModuleMetadata {
-    private type: Type<any>;
+    private type: TypeMetadata;
     private modules = new Set<Type<any>>();
     //private providers = new Map<Type<any>, Set<Provider>>();
     private providers = new Set<Provider>();
     private controllers = new Set<Type<any>>();
 
-    constructor(type: Type<any>) {
+    constructor(type: TypeMetadata) {
         this.type = type;
     }
 

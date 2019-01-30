@@ -1,9 +1,10 @@
 import { Type, Reflector, NoAnnotationError, AnnotationDescriptor, InvalidPathError,  } from "../../common";
 
-import { ModuleMetadata, ControllerMetadata, ModuleSummary, ControllerSummary } from "../metadata";
+import { ModuleMetadata, ControllerMetadata, ModuleSummary, ControllerSummary, TypeMetadata } from "../metadata";
 import { Injectable, Module, Controller, Route, RouteOption, ModuleAuth } from '../annotations';
 import { InjectionToken } from "../di";
 import { ServerRegisterPluginObject } from "hapi";
+import { LifecycleResolver } from "./LifecycleResolver";
 
 // FIXME: Remove the need of these
 // @internal
@@ -12,6 +13,10 @@ export const MODULE_PLUGINS = new InjectionToken<ServerRegisterPluginObject<any>
 
 @Injectable()
 export class MetadataResolver {
+
+    constructor(private lifecycleResolver: LifecycleResolver) {}
+
+    private typeCache = new Map<Type<any>, TypeMetadata>();
     private moduleCache = new Map<Type<any>, ModuleMetadata>();
     private controllerCache = new Map<Type<any>, ControllerMetadata>();
 
@@ -19,6 +24,7 @@ export class MetadataResolver {
      * Clears the cache of this resolver
      */
     clearCache() {
+        this.typeCache.clear();
         this.moduleCache.clear();
         this.controllerCache.clear();
     }
@@ -85,7 +91,7 @@ export class MetadataResolver {
             throw new NoAnnotationError(type, AnnotationDescriptor.MODULE);
         }
 
-        const metadata = new ModuleMetadata(type);
+        const metadata = new ModuleMetadata(this.resolveTypeMetadata(type));
 
         if(annotation.imports) {
             annotation.imports.forEach(importedModule => {
@@ -197,6 +203,21 @@ export class MetadataResolver {
         });
 
         this.controllerCache.set(type, metadata);
+
+        return metadata;
+    }
+
+    resolveTypeMetadata(type: Type<any>): TypeMetadata {
+        if(this.typeCache.has(type)) {
+            return this.typeCache.get(type)!;
+        }
+
+        const metadata: TypeMetadata = {
+            reference: type,
+            lifecycleFlags: this.lifecycleResolver.resolveHooksFlag(type)
+        }
+
+        this.typeCache.set(type, metadata);
 
         return metadata;
     }

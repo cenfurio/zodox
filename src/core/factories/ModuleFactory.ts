@@ -16,6 +16,6 @@ export class ModuleFactory extends BaseFactory<ModuleSummary, ModuleRef> {
 
         //const providers = this.metadata.providers.get(this.metadata.reference);
 
-        return new ModuleRef(type, Injector.resolveAndCreate([...providers], parent));
+        return new ModuleRef(this.summary, parent);
     }
 }

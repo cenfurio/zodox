@@ -1,4 +1,4 @@
-import { Type, asyncForEach } from '../../common';
+import { Type, asyncForEach, Destroyable, removeItem } from '../../common';
 import { Injector } from "../di";
 
 import { Server } from 'hapi';
@@ -6,9 +6,13 @@ import { MetadataResolver } from "../resolvers/MetadataResolver";
 import { ModuleFactory } from '../factories/ModuleFactory';
 import { ControllerFactory } from '../factories/ControllerFactory';
 import { Injectable } from '../annotations';
+import { ModuleRef } from './ModuleRef';
 
 @Injectable()
-export class ApplicationRef {
+export class ApplicationRef implements Destroyable {
+    
+    private modules: ModuleRef[] = [];
+
     constructor(
         private injector: Injector,
         private server: Server,
@@ -21,6 +25,10 @@ export class ApplicationRef {
     async loadModule(module: Type<any>) {
         const moduleFactory = new ModuleFactory(this.resolver.getModuleSummary(module));
         const moduleRef = moduleFactory.create(this.injector);
+
+        this.modules.push(moduleRef);
+
+        moduleRef.onDestroy(() => removeItem(this.modules, moduleRef));
 
         // FIXME: This really is just a temp fix, should be done in a more proper way
         if(moduleRef.plugins) {
@@ -51,6 +59,18 @@ export class ApplicationRef {
 
         await this.server.start();
 
+        // setTimeout(() => {
+        //     this.destroy();
+        // }, 2000);
+
         return this.server;
+    }
+
+    destroy() {
+        console.debug('[ApplicationRef]: destroy()');
+        this.modules.forEach(moduleRef => moduleRef.destroy());
+        this.server.stop();
+        console.debug('[ServerRef]: Destroyed');
+        console.debug('[ApplicationRef]: Destroyed');
     }
 }
