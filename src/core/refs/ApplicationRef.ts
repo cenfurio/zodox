@@ -1,11 +1,4 @@
-import { Type, asyncForEach, Destroyable, removeItem } from '../../common';
-import { Injector } from "../di";
-import { Type, asyncForEach } from '../../common';
-import { Injector, InjectionToken } from "../di";
-
-import { MetadataResolver } from "../resolvers/MetadataResolver";
-import { ModuleFactory } from '../factories/ModuleFactory';
-import { ControllerFactory } from '../factories/ControllerFactory';
+import { InjectionToken } from "../di";
 import { Injectable, Inject, Optional } from '../annotations';
 
 export const APP_INITIALIZER = new InjectionToken<Promise<any>[]>('Application Initializers');
@@ -25,14 +18,6 @@ export class ApplicationInitializer {
 
     get promise(): Promise<any> {
         return this._donePromise;
-    }
-
-    destroy() {
-        console.debug('[ApplicationRef]: destroy()');
-        this.modules.forEach(moduleRef => moduleRef.destroy());
-        this.server.stop();
-        console.debug('[ServerRef]: Destroyed');
-        console.debug('[ApplicationRef]: Destroyed');
     }
 }
 

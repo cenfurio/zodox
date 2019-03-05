@@ -1,6 +1,5 @@
 import { Type, Destroyable } from "../../common";
 import { Injector } from "../di";
-import { ModuleSummary } from "../metadata";
 import { LifecylceFlag } from "../resolvers/LifecycleResolver";
 import { LifecycleService } from "../services/LifecycleService";
 
@@ -19,7 +18,7 @@ export class ModuleRef implements Destroyable {
 
     private destroyCallbacks: (() => void)[] | null = [];
 
-    constructor(readonly summary: ModuleSummary, parentInjector: Injector) {
+    constructor(readonly summary: any, parentInjector: Injector) {
 
         this.injector = Injector.resolveAndCreate([
             ...this.summary.providers,
