@@ -4,6 +4,7 @@ import { NormalizedProvider } from "../providers/NormalizedProvider";
 import { ResolvedDependency } from "./ResolvedDependency";
 import { ResolvedProvider } from "./ResolvedProvider";
 import { Provider } from "../providers";
+import { InjectionKey } from '../InjectionKey';
 
 export class Resolver {
 
@@ -18,10 +19,9 @@ export class Resolver {
 
     static resolveProviders(providers: Provider<any>[]): ResolvedProvider[] {
         const normalized = this.normalizeProviders(providers);
-        
-        // TODO: Dedupe normalized list of providers
+        const resolved = normalized.map(ResolvedProvider.resolve);
 
-        return normalized.map(ResolvedProvider.resolve);
+        return this.dedupeResolvedProviders(resolved);
     }
 
     static resolveDependencies(type: Type<any>): ResolvedDependency[] {
@@ -72,5 +72,29 @@ export class Resolver {
         }
 
         return result as NormalizedProvider<any>[];
+    }
+
+    private static dedupeResolvedProviders(providers: ResolvedProvider[]): ResolvedProvider[] {
+        const cache = new Map<InjectionKey, ResolvedProvider>();
+
+        for(const provider of providers) {
+            const existing = cache.get(provider.key);
+
+            if(existing) {
+                if(provider.multi !== existing.multi) {
+                    throw new Error('NO_MIX_MULTI_PROVIDER'); // TODO: Write proper error message
+                }
+
+                if(provider.multi) {
+                    existing.factories = [...existing.factories, ...provider.factories]
+                } else {
+                    cache.set(provider.key, provider);
+                }
+            } else {
+                cache.set(provider.key, provider);
+            }
+        }
+
+        return [...cache.values()];
     }
 }
