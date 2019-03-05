@@ -1,5 +1,5 @@
 import { Type, Omit } from "../../common";
-import { Provider } from "../di";
+import { Provider } from "../../core";
 import { ServerRoute, RouteOptions } from "hapi";
 
 export interface ControllerSummary {
