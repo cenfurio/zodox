@@ -1,7 +1,7 @@
 import { ServerRoute } from "hapi";
 import { Type, Destroyable } from "../../common";
 
-import { RouteMetadata } from "../metadata";
+// import { RouteMetadata } from "../metadata";
 import { Injector } from "../di";
 
 export class ControllerRef implements Destroyable {
@@ -10,7 +10,7 @@ export class ControllerRef implements Destroyable {
     readonly instance: any;
     readonly routes: ReadonlyArray<ServerRoute>;
 
-    constructor(type: Type<any>, routes: ReadonlyArray<[string, RouteMetadata]>, parentInjector: Injector) {
+    constructor(type: Type<any>, routes: ReadonlyArray<[string, any]>, parentInjector: Injector) {
         this.injector = Injector.resolveAndCreate([{
             provide: ControllerRef,
             useValue: this

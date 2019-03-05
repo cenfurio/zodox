@@ -1,10 +1,10 @@
 import { Injector } from "../di";
 
-import { ControllerSummary } from "../metadata";
+// import { ControllerSummary } from "../metadata";
 import { ControllerRef } from "../refs";
 import { BaseFactory } from "./BaseFactory";
 
-export class ControllerFactory extends BaseFactory<ControllerSummary, ControllerRef> {
+export class ControllerFactory extends BaseFactory<any, ControllerRef> {
     create(parent: Injector) {
         // const definition: ControllerDef = {
         //     type: this.metadata.type,

@@ -1,203 +1,101 @@
-import { Type, Reflector, NoAnnotationError, AnnotationDescriptor, InvalidPathError,  } from "../../common";
+import { Type } from "../../common";
 
-import { ModuleMetadata, ControllerMetadata, ModuleSummary, ControllerSummary } from "../metadata";
-import { Injectable, Module, Controller, Route, RouteOption, ModuleAuth } from '../annotations';
-import { InjectionToken } from "../di";
-import { ServerRegisterPluginObject } from "hapi";
+import { ModuleMetadata, TypeMetadata } from "../metadata";
+import { Injectable, Inject } from '../annotations';
+import { BaseResolver } from "./BaseResolver";
+import { InjectionToken, Provider } from "../di";
+import { any } from "joi";
 
-// FIXME: Remove the need of these
-// @internal
-export const MODULE_AUTH_CONFIG = new InjectionToken<ModuleAuth>('module auth');
-export const MODULE_PLUGINS = new InjectionToken<ServerRegisterPluginObject<any>[]>('module plugins');
+export const META_RESOLVERS = new InjectionToken<BaseResolver>('List of resolvers');
+
+class TransitiveModule {
+    modules: Type<any>[] = [];
+    declarations: Type<any>[] = [];
+    providers: { module: Type<any>, provider: Provider<any> }[] = [];
+
+    addModule(type: Type<any>) {
+        this.modules.push(type);
+    }
+
+    addDeclaration(type: Type<any>) {
+        this.modules.push(type);
+    }
+
+    addProvider(module: Type<any>, provider: Provider<any>) {
+        this.providers.push({ module, provider });
+    }
+}
 
 @Injectable()
 export class MetadataResolver {
-    private moduleCache = new Map<Type<any>, ModuleMetadata>();
-    private controllerCache = new Map<Type<any>, ControllerMetadata>();
+    private moduleCache = new Map<Type<any>, TransitiveModule>();
 
-    /**
-     * Clears the cache of this resolver
-     */
-    clearCache() {
-        this.moduleCache.clear();
-        this.controllerCache.clear();
-    }
+    constructor(@Inject(META_RESOLVERS) private resolvers: BaseResolver[]) {}
 
-    /**
-     * Checks whether the given type is a module
-     * @param type The module type
-     */
-    isModule(type: Type<any>) {
-        return Reflector.hasAnnotation(type, Module);
-    }
+    resolveMetadata<T extends TypeMetadata>(type: Type<any>): T {
+        const resolver = this.resolvers.find(r => r.isSupported(type));
 
-    /**
-     * Checks whether the given type is a controller
-     * @param type The controller type
-     */
-    isController(type: Type<any>) {
-        return Reflector.hasAnnotation(type, Controller);
-    }
-
-    /**
-     * Gets the {@link ModuleSummary} of the module
-     * @param type The module type
-     * @throws NoAnnotationError
-     */
-    getModuleSummary(type: Type<any>): ModuleSummary {
-        if(this.moduleCache.has(type)) {
-            return this.moduleCache.get(type)!.toSummary();
+        if(!resolver) {
+            throw new Error(`Failed to resolve metadata of ${type.name}, did you add it's resolver to the 'META_RESOLVERS' multi provider.`);
         }
 
-        const metadata = this.resolveModuleMetadata(type);
+        return resolver.resolve(type) as T;
+    }
+
+    resolveModule(type: Type<any>) {
+        const module = this.resolveMetadata<ModuleMetadata>(type);
+
         
-        return metadata.toSummary();
     }
 
-    /**
-     * Gets the {@link ControllerSummary} of the controller
-     * @param type The controller type
-     * @throws NoAnnotationError
-     */
-    getControllerSummary(type: Type<any>): ControllerSummary {
-        if(this.controllerCache.has(type)) {
-            return this.controllerCache.get(type)!.toSummary();
-        }
-
-        const metadata = this.resolveControllerMetadata(type);
-
-        return metadata.toSummary();
-    }
-
-    /**
-     * Resolves given type into {@link ModuleMetadata}
-     * @param type The module type
-     * @throws NoAnnotationError
-     */
-    resolveModuleMetadata(type: Type<any>): ModuleMetadata {
+    ex_getTransistiveModule(type: Type<any>): TransitiveModule {
         if(this.moduleCache.has(type)) {
             return this.moduleCache.get(type)!;
         }
 
-        const annotation = Reflector.getAnnotation(type, Module);
+        const metadata = this.resolveMetadata<ModuleMetadata>(type);
+        const result = new TransitiveModule();
 
-        if(!annotation) {
-            throw new NoAnnotationError(type, AnnotationDescriptor.MODULE);
-        }
+        const providerModules = new Map<any, Set<Type<any>>>();
 
-        const metadata = new ModuleMetadata(type);
+        metadata.importedModules.concat(metadata.exportedModules).forEach(module => {
+            const transitiveModule = this.ex_getTransistiveModule(module.type);
 
-        if(annotation.imports) {
-            annotation.imports.forEach(importedModule => {
-                if(importedModule == type) {
-                    return;
+            transitiveModule.modules.forEach(mod => result.addModule(mod));
+            // transitiveModule.declarations.forEach(dec => result.addDeclarations(dec));
+
+            transitiveModule.providers.forEach(entry => {
+                let prevModules = providerModules.get((entry.provider as any).provide || entry.provider); // TODO: Normalize providers, because this will not work properly
+                if(!prevModules) {
+                    prevModules = new Set<Type<any>>();
+                    providerModules.set(entry.provider, prevModules);
                 }
 
-                if(!this.isModule(importedModule)) {
-                    throw new NoAnnotationError(importedModule, AnnotationDescriptor.MODULE);
+                // Only add if it wasn't added before
+                // NOTE: Multi providers currently wont work...
+                if(!prevModules.has(entry.module)) {
+                    prevModules.add(entry.module);
+                    result.addProvider(entry.module, entry.provider);
                 }
-
-                // TODO: Check whether this module was already included earlier
-                const summary = this.getModuleSummary(importedModule);
-
-                summary.modules.forEach(mod => metadata.addModule(mod));
-                summary.controllers.forEach(controller => metadata.addController(controller));
-                // summary.providers.forEach((providers, modType) => {
-                //     // TODO: Do some provider checkin...
-
-                //     providers.forEach(provider => metadata.addProvider(modType, provider));
-                // });
-                summary.providers.forEach(provider => metadata.addProvider(provider));
             });
-        }
-
-        if(annotation.controllers) {
-            annotation.controllers.forEach(controller => {
-                if(!this.isController(controller)) {
-                    throw new NoAnnotationError(controller, AnnotationDescriptor.CONTROLLER);
-                }
-
-                metadata.addController(controller);
-            })
-        }
-
-        // TODO: Only allow this in the MainModule
-        if(annotation.auth) {
-            metadata.addProvider({
-                provide: MODULE_AUTH_CONFIG,
-                useValue: annotation.auth
-            });
-        }
-
-        // TODO: Only allow this in the MainModule
-        if(annotation.plugins) {
-            metadata.addProvider({
-                provide: MODULE_PLUGINS,
-                useValue: annotation.plugins
-            });
-        }
-
-        if(annotation.providers) {
-            annotation.providers.forEach(provider => metadata.addProvider(provider));
-        }
-
-        // TODO: Handle plugins
-
-        metadata.addModule(type);
-
-        this.moduleCache.set(type, metadata);
-
-        return metadata;
-    }
-
-    /**
-     * Resolves given type into {@link ControllerMetadata}
-     * @param type The controller type
-     * @throws NoAnnotationError
-     */
-    resolveControllerMetadata(type: Type<any>): ControllerMetadata {
-        if(this.controllerCache.has(type)) {
-            return this.controllerCache.get(type)!;
-        }
-
-        const annotation = Reflector.getAnnotation(type, Controller);
-        if(!annotation) {
-            throw new NoAnnotationError(type, AnnotationDescriptor.CONTROLLER);
-        }
-
-        const metadata = new ControllerMetadata(type);
-
-        if(annotation.providers) {
-            annotation.providers.forEach(provider => metadata.addProvider(provider));
-        }
-
-        const propAnnotations = Reflector.propMetadata(type);
-        
-        Object.keys(propAnnotations).forEach(propKey => {
-            propAnnotations[propKey].forEach(propAnnotation => {
-                if(propAnnotation instanceof Route) {
-                    if(!propAnnotation.path.startsWith('/')) {
-                        throw new InvalidPathError(propAnnotation.path);
-                    }
-
-                    if(propAnnotation.path.length === 1) { // AKA, only a /
-                        propAnnotation.path = '';
-                    }
-
-                    metadata.addRoute(propKey, {
-                        ...propAnnotation,
-                        path: annotation.path + propAnnotation.path
-                    })
-                }
-
-                if(propAnnotation instanceof RouteOption) {
-                    metadata.addRouteOptions(propKey, { ...propAnnotation });
-                }
-            })
         });
 
-        this.controllerCache.set(type, metadata);
+        metadata.importedModules.forEach(module => {
+            // If everything goes right this should already be cached
+            // If not, welll...yea then this is an expensive thing to do twice.
+            // TODO: Check whether caching works properly
+            const transitiveModule = this.ex_getTransistiveModule(module.type);
 
-        return metadata;
+            transitiveModule.declarations.forEach(dec => result.addDeclaration(dec));
+        })
+
+        result.addModule(type);
+
+        metadata.providers.forEach(provider => result.addProvider(metadata.type, provider));
+        metadata.declarations.forEach(dec => result.addDeclaration(dec));
+
+        this.moduleCache.set(type, result);
+
+        return result;
     }
 }

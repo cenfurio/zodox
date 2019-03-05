@@ -1,1 +1,3 @@
-export { MetadataResolver, MODULE_AUTH_CONFIG, MODULE_PLUGINS } from './MetadataResolver';
+export { MetadataResolver, META_RESOLVERS } from './MetadataResolver';
+export { BaseResolver } from './BaseResolver';
+export { ModuleResolver } from './ModuleResolver'

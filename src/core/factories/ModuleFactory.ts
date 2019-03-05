@@ -1,10 +1,10 @@
 import { Injector } from "../di";
 
-import { ModuleSummary } from "../metadata";
+//import { ModuleSummary } from "../metadata";
 import { ModuleRef } from "../refs";
 import { BaseFactory } from "./BaseFactory";
 
-export class ModuleFactory extends BaseFactory<ModuleSummary, ModuleRef> {
+export class ModuleFactory extends BaseFactory<any, ModuleRef> {
 
     get controllers() {
         return this.summary.controllers;
