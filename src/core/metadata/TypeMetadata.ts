@@ -1,7 +1,8 @@
 import { Type } from "../../common";
-import { LifecylceFlag } from "../resolvers/LifecycleResolver";
+import { Provider } from "../di";
 
 export interface TypeMetadata {
-    reference: Type<any>
-    lifecycleFlags: LifecylceFlag
+    type: Type<any>;
+    providers: Provider<any>[];
+    // hooks: any[]; // TODO: Add support for lifecycle hooks
 }

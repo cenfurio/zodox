@@ -1,5 +1,5 @@
 import { ServerRoute, Util, RouteOptions, RouteOptionsAccess, RouteOptionsValidate, RouteOptionsPayload } from "hapi";
-import { Provider } from "../di";
+import { Provider } from "../../core";
 
 import { makeDecorator, makePropDecorator, Omit } from "../../common";
 

@@ -1,4 +1,4 @@
-import { ResolvedProvider, Resolver } from "./resolver";
+import { ResolvedProvider, Resolver, ResolvedFactory } from "./resolver";
 import { InjectionKey } from "./InjectionKey";
 import { NoProviderError } from "../../common";
 import { Provider } from "./providers";
@@ -24,7 +24,7 @@ export class Injector {
         });
     }
  
-    get<T>(key: InjectionKey<T>, fallback?: T): T | null {
+    get<T>(key: InjectionKey<T>, fallback?: T): T {
         return this.getByKey(key, fallback);
     }
 
@@ -62,19 +62,31 @@ export class Injector {
             return this.throwOrNull(key, fallback);
         }
 
-        return this.compileProvider(resolved);
+        const instance = this.compileProvider(resolved);
+
+        this.injectables.set(resolved.key, instance);
+
+        return instance;
 
     }
 
     private compileProvider(provider: ResolvedProvider) {
-        const { factory, dependencies } = provider.factory;
+        if(provider.multi) {
+            return provider.factories.map(factory => this.compile(factory));
+        }
+
+        return this.compile(provider.factory);
+    }
+
+    private compile(resolvedFactory: ResolvedFactory) {
+        const { factory, dependencies } = resolvedFactory;
     
         try {
             const deps = dependencies.map(dep => this.getByKey(dep.key, dep.optional ? null : THROW_NOT_FOUND));
             const instance = factory(...deps);
 
             // Let's cache it
-            this.injectables.set(provider.key, instance);
+            // this.injectables.set(provider.key, instance);
 
             return instance;
         } catch(err) {

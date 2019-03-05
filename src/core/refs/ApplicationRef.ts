@@ -1,69 +1,30 @@
 import { Type, asyncForEach, Destroyable, removeItem } from '../../common';
 import { Injector } from "../di";
+import { Type, asyncForEach } from '../../common';
+import { Injector, InjectionToken } from "../di";
 
-import { Server } from 'hapi';
 import { MetadataResolver } from "../resolvers/MetadataResolver";
 import { ModuleFactory } from '../factories/ModuleFactory';
 import { ControllerFactory } from '../factories/ControllerFactory';
-import { Injectable } from '../annotations';
-import { ModuleRef } from './ModuleRef';
+import { Injectable, Inject, Optional } from '../annotations';
+
+export const APP_INITIALIZER = new InjectionToken<Promise<any>[]>('Application Initializers');
 
 @Injectable()
-export class ApplicationRef implements Destroyable {
-    
-    private modules: ModuleRef[] = [];
+export class ApplicationInitializer {
+    private _donePromise: Promise<any>;
+    private _done = false;
 
-    constructor(
-        private injector: Injector,
-        private server: Server,
-        private resolver: MetadataResolver) {}
+    constructor(@Inject(APP_INITIALIZER) @Optional() initializers: Promise<any>[] = []) {
+        this._donePromise = Promise.all(initializers).then(() => this._done = true);
+    }
 
-    /**
-     * Loads a module and starts the hapi server
-     * @param module The module to load
-     */
-    async loadModule(module: Type<any>) {
-        const moduleFactory = new ModuleFactory(this.resolver.getModuleSummary(module));
-        const moduleRef = moduleFactory.create(this.injector);
+    get done(): boolean {
+        return this.done;
+    }
 
-        this.modules.push(moduleRef);
-
-        moduleRef.onDestroy(() => removeItem(this.modules, moduleRef));
-
-        // FIXME: This really is just a temp fix, should be done in a more proper way
-        if(moduleRef.plugins) {
-            await asyncForEach(moduleRef.plugins, async (plugin) => {
-                await this.server.register(plugin);
-            });
-        }
-
-        if(moduleRef.auth) {
-            if(moduleRef.auth.strategies) {
-                await asyncForEach(moduleRef.auth.strategies, async (strategy) => {
-                    this.server.auth.strategy(strategy.name, strategy.scheme, strategy.options);
-                });
-            }
-
-            if(moduleRef.auth.default) {
-                this.server.auth.default(moduleRef.auth.default);
-            }
-        }
-
-        await asyncForEach(moduleFactory.controllers, async (controller) => {
-            const controllerFactory = new ControllerFactory(this.resolver.getControllerSummary(controller));
-
-            const controllerRef = controllerFactory.create(moduleRef.injector);
-
-            this.server.route([...controllerRef.routes]);
-        });
-
-        await this.server.start();
-
-        // setTimeout(() => {
-        //     this.destroy();
-        // }, 2000);
-
-        return this.server;
+    get promise(): Promise<any> {
+        return this._donePromise;
     }
 
     destroy() {
@@ -73,4 +34,8 @@ export class ApplicationRef implements Destroyable {
         console.debug('[ServerRef]: Destroyed');
         console.debug('[ApplicationRef]: Destroyed');
     }
+}
+
+export abstract class ApplicationRef {
+    abstract start(): Promise<any>;
 }

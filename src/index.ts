@@ -2,10 +2,10 @@ export {
     Type, Omit, Destroyable,
     isType, isDestroyable,
     makeDecorator, makeParamDecorator, makePropDecorator, asyncForEach, Reflector,
-    InvalidPathError, InvalidStateError, NoProviderError, NoAnnotationError, AnnotationDescriptor } from './common';
+    InvalidStateError, NoProviderError, NoAnnotationError } from './common';
 
 export {
-    Boot, ApplicationRef, ModuleRef, ControllerRef,
-    Module, Controller, Route, Put, Post, Patch, Get, Delete, Auth, Payload, Validate,
+    ApplicationRef, ModuleRef, ControllerRef,
+    Module, 
     Inject, Injectable, Optional, Self, SkipSelf,
     Injector, InjectionToken, Provider } from './core';

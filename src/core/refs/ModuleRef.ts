@@ -1,6 +1,5 @@
 import { Type, Destroyable } from "../../common";
 import { Injector } from "../di";
-import { MODULE_AUTH_CONFIG, MODULE_PLUGINS } from "../resolvers";
 import { ModuleSummary } from "../metadata";
 import { LifecylceFlag } from "../resolvers/LifecycleResolver";
 import { LifecycleService } from "../services/LifecycleService";
@@ -10,13 +9,13 @@ export class ModuleRef implements Destroyable {
     public instance: any;
     public injector: Injector;
 
-    get auth() {
-        return this.injector.get(MODULE_AUTH_CONFIG);
-    }
+    // get auth() {
+    //     return this.injector.get(MODULE_AUTH_CONFIG);
+    // }
 
-    get plugins() {
-        return this.injector.get(MODULE_PLUGINS);
-    }
+    // get plugins() {
+    //     return this.injector.get(MODULE_PLUGINS);
+    // }
 
     private destroyCallbacks: (() => void)[] | null = [];
 
