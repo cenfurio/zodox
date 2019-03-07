@@ -37,14 +37,12 @@ export class PlatformRef {
 
     async loadModule<T>(module: Type<T>): Promise<ModuleRef<T>> {
         // const moduleMeta = this.resolver.resolveModule(module);
-        const moduleFactory = this.ex_createModuleFactory(module, this.resolver.ex_getTransitiveModule(module));
+        const transitiveModule = this.resolver.ex_getTransitiveModule(module);
+        const moduleFactory = this.ex_createModuleFactory(module, transitiveModule);
 
-        console.log(moduleFactory);
-
-        // TODO: Actually use the module metadata....
         const moduleRef = moduleFactory(this.injector);
 
-        console.log(moduleRef);
+        //console.log(moduleRef);
 
         const appInitializer = moduleRef.injector.get(ApplicationInitializer, null);
         if(!appInitializer) {
@@ -53,6 +51,8 @@ export class PlatformRef {
 
         // Wait for all app initializers to finish
         await appInitializer.promise;
+
+        await moduleRef.declarationLoader.handleDeclarations(transitiveModule.declarations);
 
         // Time to boot the application
         const appRef = moduleRef.injector.get(ApplicationRef, null);
@@ -72,7 +72,7 @@ export class PlatformRef {
 
             return new ModuleRef<T>({
                 type,
-                providers: [...moduleProviders, ...declarationProviders, ...providers],
+                providers: [...providers, ...declarationProviders, ...moduleProviders],
                 declarations: transitiveModule.declarations
             }, parentInjector);
         }

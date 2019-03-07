@@ -78,7 +78,7 @@ export class Resolver {
             else if(provider instanceof Array) {
                 this.normalizeProviders(provider, result);
             } else {
-                throw new Error('Invalid provider');
+                throw new Error(`Invalid provider: ${JSON.stringify(provider)}`);
             }
         }
 

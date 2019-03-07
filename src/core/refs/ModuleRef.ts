@@ -1,12 +1,54 @@
-import { Type, Destroyable } from "../../common";
-import { Injector } from "../di";
+import { Type, Destroyable, asyncForEach } from "../../common";
+import { Injector, InjectionToken } from "../di";
 import { LifecylceFlag } from "../resolvers/LifecycleResolver";
 import { LifecycleService } from "../services/LifecycleService";
+import { Inject, Optional } from "../annotations";
+import { TypeMetadata } from "../metadata";
+import { DeclarationMetadata } from "../metadata/DeclarationMetadata";
+
+export abstract class DeclarationHandler<T extends DeclarationMetadata> {
+    abstract isSupported(declaration: DeclarationMetadata): boolean;
+    abstract handle(declaration: DeclarationMetadata): Promise<any>;
+}
+
+export const MODULE_DECLARATION_HANDLER = new InjectionToken<DeclarationHandler<any>>('Module Declaration Handlers');
+
+export class ModuleDeclarationLoader {
+    constructor(
+        @Inject(MODULE_DECLARATION_HANDLER)
+        @Optional()
+        private handlers: DeclarationHandler<any>[] = []) {}
+
+    async handleDeclarations(declarations: DeclarationMetadata[]) {
+        await asyncForEach(declarations, async declaration => {
+            await this.handleDeclaration(declaration);
+        });
+    }
+    
+    async handleDeclaration(declaration: DeclarationMetadata) {
+        console.log(declaration);
+        const supportedHandlers = this.handlers.filter(handler => handler.isSupported(declaration));
+
+        if(supportedHandlers.length == 0) {
+            throw new Error(`No declaration handlers found for ${declaration.type.name}`);
+        }
+
+        await asyncForEach(supportedHandlers, async handler => {
+            await handler.handle(declaration);
+        });
+    }
+}
 
 export class ModuleRef<T> implements Destroyable {
+    public readonly injector: Injector;
 
-    public instance: T;
-    public injector: Injector;
+    get instance(): T {
+        return this.injector.get(this.summary.type);
+    }
+
+    get declarationLoader(): ModuleDeclarationLoader {
+        return this.injector.get(ModuleDeclarationLoader);
+    }
 
     // get auth() {
     //     return this.injector.get(MODULE_AUTH_CONFIG);
@@ -18,19 +60,19 @@ export class ModuleRef<T> implements Destroyable {
 
     private destroyCallbacks: (() => void)[] | null = [];
 
-    constructor(readonly summary: any, parentInjector: Injector) {
-
-        console.log(summary.providers);
+    constructor(private readonly summary: any, parentInjector: Injector) {
 
         this.injector = Injector.resolveAndCreate([
             ...this.summary.providers,
+            ModuleDeclarationLoader,
             {
                 provide: ModuleRef,
                 useValue: this
             }, 
         ], parentInjector);
 
-        this.instance = this.injector.get(this.summary.type);
+        //this.instance = this.injector.get(this.summary.type);
+
 
         //this.injector.get(LifecycleService)!.registerModule(this);
         // if(this.summary.type.lifecycleFlags & LifecylceFlag.OnInit) {

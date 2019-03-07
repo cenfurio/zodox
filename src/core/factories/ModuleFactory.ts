@@ -4,7 +4,7 @@ import { Injector } from "../di";
 import { ModuleRef } from "../refs";
 import { BaseFactory } from "./BaseFactory";
 
-export class ModuleFactory extends BaseFactory<any, ModuleRef> {
+export class ModuleFactory extends BaseFactory<any, ModuleRef<any>> {
 
     get controllers() {
         return this.summary.controllers;

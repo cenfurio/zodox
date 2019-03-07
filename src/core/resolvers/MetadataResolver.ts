@@ -4,19 +4,19 @@ import { ModuleMetadata, TypeMetadata } from "../metadata";
 import { Injectable, Inject } from '../annotations';
 import { BaseResolver } from "./BaseResolver";
 import { InjectionToken, Provider } from "../di";
-import { any } from "joi";
 import { ModuleResolver } from "./ModuleResolver";
+import { DeclarationMetadata } from "../metadata/DeclarationMetadata";
 
 export class TransitiveModule {
     modules: Type<any>[] = [];
-    declarations: TypeMetadata[] = [];
+    declarations: DeclarationMetadata[] = [];
     providers: { module: Type<any>, provider: Provider<any> }[] = [];
 
     addModule(type: Type<any>) {
         this.modules.push(type);
     }
 
-    addDeclaration(type: any) {
+    addDeclaration(type: DeclarationMetadata) {
         this.declarations.push(type);
     }
 

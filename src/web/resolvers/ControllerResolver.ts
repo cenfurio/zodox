@@ -21,11 +21,11 @@ export class ControllerResolver extends BaseResolver {
             throw new NoAnnotationError(type, 'Controller');
         }
 
-        const metadata = new ControllerMetadata(type);
+        const metadata = new ControllerMetadata({ type, providers: annotation.providers });
 
-        if(annotation.providers) {
-            annotation.providers.forEach(provider => metadata.addProvider(provider));
-        }
+        // if(annotation.providers) {
+        //     annotation.providers.forEach(provider => metadata.addProvider(provider));
+        // }
 
         const propAnnotations = Reflector.propMetadata(type);
         
@@ -40,14 +40,14 @@ export class ControllerResolver extends BaseResolver {
                         propAnnotation.path = '';
                     }
 
-                    metadata.addRoute(propKey, {
-                        ...propAnnotation,
-                        path: annotation.path + propAnnotation.path
-                    })
+                    // metadata.addRoute(propKey, {
+                    //     ...propAnnotation,
+                    //     path: annotation.path + propAnnotation.path
+                    // })
                 }
 
                 if(propAnnotation instanceof RouteOption) {
-                    metadata.addRouteOptions(propKey, { ...propAnnotation });
+                    // metadata.addRouteOptions(propKey, { ...propAnnotation });
                 }
             })
         });

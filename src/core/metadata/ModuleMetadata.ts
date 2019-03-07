@@ -1,5 +1,6 @@
 import { Type } from "../../common";
 import { TypeMetadata } from "./TypeMetadata";
+import { DeclarationMetadata } from "./DeclarationMetadata";
 // import { Provider } from "../di";
 // import { TypeMetadata } from "./TypeMetadata";
 
@@ -11,8 +12,8 @@ import { TypeMetadata } from "./TypeMetadata";
 //     providers: ReadonlyArray<Provider>;
 // }
 
-export interface ModuleMetadata extends TypeMetadata {
-    declarations: TypeMetadata[];
+export interface ModuleMetadata extends DeclarationMetadata {
+    declarations: DeclarationMetadata[];
     importedModules: ModuleMetadata[];
     exportedModules: ModuleMetadata[];
 }

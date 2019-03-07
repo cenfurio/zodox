@@ -3,16 +3,15 @@ import { Type, Reflector, NoAnnotationError } from "../../common";
 import { Module, Inject, Optional, Injectable } from "../annotations";
 import { ModuleMetadata, TypeMetadata } from "../metadata";
 import { Injector, InjectionToken } from "../di";
+import { DeclarationMetadata } from "../metadata/DeclarationMetadata";
 
 export const META_RESOLVERS = new InjectionToken<BaseResolver>('List of resolvers');
 
 @Injectable()
-export class ModuleResolver extends BaseResolver {
+export class ModuleResolver {
     private cache = new Map<Type<any>, any>();
 
-    constructor(@Inject(META_RESOLVERS) @Optional() private resolvers: BaseResolver[] = []) {
-        super()
-    }
+    constructor(@Inject(META_RESOLVERS) @Optional() private resolvers: BaseResolver[] = []) {}
 
     isSupported(type: Type<any>): boolean {
         return Reflector.hasAnnotation(type, Module);
@@ -105,7 +104,7 @@ export class ModuleResolver extends BaseResolver {
         return metadata;
     }
 
-    private resolveDeclaration<T extends TypeMetadata>(type: Type<any>): T {
+    private resolveDeclaration<T extends DeclarationMetadata>(type: Type<any>): T {
         const resolver = this.resolvers.find(r => r.isSupported(type));
 
         if(!resolver) {
