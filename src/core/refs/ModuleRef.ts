@@ -8,7 +8,7 @@ import { DeclarationMetadata } from "../metadata/DeclarationMetadata";
 
 export abstract class DeclarationHandler<T extends DeclarationMetadata> {
     abstract isSupported(declaration: DeclarationMetadata): boolean;
-    abstract handle(declaration: DeclarationMetadata): Promise<any>;
+    abstract handle(declaration: T): Promise<any>;
 }
 
 export const MODULE_DECLARATION_HANDLER = new InjectionToken<DeclarationHandler<any>>('Module Declaration Handlers');
