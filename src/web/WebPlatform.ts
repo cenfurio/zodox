@@ -2,10 +2,12 @@ import { createPlatform, CorePlatform, Provider, META_RESOLVERS, Module } from "
 
 import { ControllerResolver } from "./resolvers/ControllerResolver";
 import { ApplicationRef } from "./refs/ApplicationRef";
-import { Controller, WebModule } from "./annotations";
+import { Controller, WebModule, Get, Auth } from "./annotations";
 import { ApplicationModule } from "../core/ApplicationModule";
-import { MODULE_DECLARATION_HANDLER } from "../core/refs/ModuleRef";
+import { MODULE_DECLARATION_HANDLER } from "../core/refs";
 import { ControllerHandler } from "./handlers/ControllerHandler";
+import { Middleware } from "./annotations/middleware";
+import { KoaModule } from "./server/koa";
 
 const WEB_PLATFORM_PROVIDERS: Provider<any>[] = [
     {
@@ -22,15 +24,33 @@ const WEB_PLATFORM_PROVIDERS: Provider<any>[] = [
 
 export const WebPlatform = createPlatform(CorePlatform, WEB_PLATFORM_PROVIDERS);
 
+@Middleware('auth')
+class AuthMiddleware {
+    async process() {
+
+    }
+}
+
 @Controller({
     path: '/test'
 })
-class TestController {}
+class TestController {
+
+    @Get('/test')
+    async getSomething() {
+
+    }
+}
 
 @WebModule({
     controllers: [TestController],
-    //providers: [ApplicationRef],
-    imports: [ApplicationModule]
+    //middleware: [AuthMiddleware],
+    imports: [
+        KoaModule.withConfig({
+            port: 3000,
+            host: '0.0.0.0'
+        })
+    ]
 })
 class MainModule {
     onStart(appRef: ApplicationRef) {

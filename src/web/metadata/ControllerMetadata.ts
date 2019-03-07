@@ -1,9 +1,10 @@
 import { Type, Omit } from "../../common";
 import { Provider } from "../../core";
 import { ServerRoute, RouteOptions } from "hapi";
-import { DeclarationMetadata } from "../../core/metadata/DeclarationMetadata";
+import { TypeMetadata } from "../../core/metadata";
+// import { DeclarationMetadata } from "../../core/metadata/DeclarationMetadata";
 
-export class ControllerMetadata implements DeclarationMetadata {
+export class ControllerMetadata implements TypeMetadata {
     // declarationType: string;
     type: Type<any>;
     providers: Provider<any>[];

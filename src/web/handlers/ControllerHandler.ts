@@ -1,10 +1,10 @@
 import { DeclarationHandler } from "../../core/refs/ModuleRef";
 import { Type } from "../../common";
 import { ControllerMetadata } from "../metadata/ControllerMetadata";
-import { DeclarationMetadata } from "../../core/metadata/DeclarationMetadata";
+import { TypeMetadata } from "../../core/metadata";
 
 export class ControllerHandler extends DeclarationHandler<ControllerMetadata> {
-    isSupported(declaration: DeclarationMetadata) {
+    isSupported(declaration: TypeMetadata) {
         return declaration instanceof ControllerMetadata;
     }
 

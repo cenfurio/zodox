@@ -1,9 +1,9 @@
 import { BaseResolver } from "./BaseResolver";
 import { Type, Reflector, NoAnnotationError } from "../../common";
-import { Module, Inject, Optional, Injectable } from "../annotations";
+import { Module, Inject, Optional, Injectable, ModuleWithProviders } from "../annotations";
 import { ModuleMetadata, TypeMetadata } from "../metadata";
-import { Injector, InjectionToken } from "../di";
-import { DeclarationMetadata } from "../metadata/DeclarationMetadata";
+import { InjectionToken } from "../di";
+import { object } from "joi";
 
 export const META_RESOLVERS = new InjectionToken<BaseResolver>('List of resolvers');
 
@@ -27,7 +27,6 @@ export class ModuleResolver {
             throw new NoAnnotationError(type, 'Module');
         }
 
-        //const metadata = new ModuleMetadata(type);
         const metadata: ModuleMetadata = {
             type,
             providers: [],
@@ -37,7 +36,18 @@ export class ModuleResolver {
         }
 
         if(annotation.imports) {
-            annotation.imports.forEach(importedModule => {
+            annotation.imports.forEach(importedType => {
+                let importedModule: Type<any> = undefined !;
+                if (importedType instanceof Function) /* Type */{
+                    importedModule = importedType;
+                } else if (importedType && importedType.module) {
+                    // const moduleWithProviders: ModuleWithProviders = importedType;
+                    importedModule = importedType.module;
+                    if (importedType.providers) {
+                        metadata.providers.push(...importedType.providers);
+                    }
+                }
+
                 if(importedModule == type) {
                     return;
                 }
@@ -104,7 +114,7 @@ export class ModuleResolver {
         return metadata;
     }
 
-    private resolveDeclaration<T extends DeclarationMetadata>(type: Type<any>): T {
+    private resolveDeclaration<T extends TypeMetadata>(type: Type<any>): T {
         const resolver = this.resolvers.find(r => r.isSupported(type));
 
         if(!resolver) {

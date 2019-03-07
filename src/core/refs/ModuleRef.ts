@@ -1,13 +1,10 @@
 import { Type, Destroyable, asyncForEach } from "../../common";
 import { Injector, InjectionToken } from "../di";
-import { LifecylceFlag } from "../resolvers/LifecycleResolver";
-import { LifecycleService } from "../services/LifecycleService";
 import { Inject, Optional } from "../annotations";
 import { TypeMetadata } from "../metadata";
-import { DeclarationMetadata } from "../metadata/DeclarationMetadata";
 
-export abstract class DeclarationHandler<T extends DeclarationMetadata> {
-    abstract isSupported(declaration: DeclarationMetadata): boolean;
+export abstract class DeclarationHandler<T extends TypeMetadata> {
+    abstract isSupported(declaration: TypeMetadata): boolean;
     abstract handle(declaration: T): Promise<any>;
 }
 
@@ -19,13 +16,13 @@ export class ModuleDeclarationLoader {
         @Optional()
         private handlers: DeclarationHandler<any>[] = []) {}
 
-    async handleDeclarations(declarations: DeclarationMetadata[]) {
+    async handleDeclarations(declarations: TypeMetadata[]) {
         await asyncForEach(declarations, async declaration => {
             await this.handleDeclaration(declaration);
         });
     }
     
-    async handleDeclaration(declaration: DeclarationMetadata) {
+    async handleDeclaration(declaration: TypeMetadata) {
         console.log(declaration);
         const supportedHandlers = this.handlers.filter(handler => handler.isSupported(declaration));
 

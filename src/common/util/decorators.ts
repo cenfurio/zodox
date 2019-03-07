@@ -4,7 +4,7 @@ import { Type } from "../lang";
 type Props<T, R extends any[]> = (...args: R) => T;
 
 export interface ClassDecorator<T, R extends any[] = []> {
-    (...args: R): (target: Type<any>) => Type<any>;
+    (...args: R): (target: Type<any>) => any;
     new (...args: R): T;
 }
 
