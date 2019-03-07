@@ -12,7 +12,7 @@ import { TypeMetadata } from "./TypeMetadata";
 // }
 
 export interface ModuleMetadata extends TypeMetadata {
-    declarations: Type<any>[];
+    declarations: TypeMetadata[];
     importedModules: ModuleMetadata[];
     exportedModules: ModuleMetadata[];
 }

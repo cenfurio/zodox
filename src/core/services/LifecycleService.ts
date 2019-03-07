@@ -10,11 +10,13 @@ export class LifecycleService {
     registerModule(ref: ModuleRef) {
         // TODO: Only do this if module was not initialized yet...
         const { lifecycleFlags } = ref.summary.type;
+        // console.log(`[Ex_Hooks][${ref.instance.constructor.name}]: OnInit`);
         if(lifecycleFlags & LifecylceFlag.OnInit) {
             ref.instance.onInit();
         }
 
         ref.onDestroy(() => {
+            // console.log(`[Ex_Hooks][${ref.instance.constructor.name}]: OnDestroy`);
             if(lifecycleFlags & LifecylceFlag.OnDestroy) {
                 ref.instance.onDestroy();
             }

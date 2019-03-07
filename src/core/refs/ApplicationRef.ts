@@ -1,26 +1,13 @@
-import { InjectionToken } from "../di";
-import { Injectable, Inject, Optional } from '../annotations';
-
-export const APP_INITIALIZER = new InjectionToken<Promise<any>[]>('Application Initializers');
+import { Injectable } from '../annotations';
+import { ModuleRef } from "./ModuleRef";
 
 @Injectable()
-export class ApplicationInitializer {
-    private _donePromise: Promise<any>;
-    private _done = false;
+export class ApplicationRef {
+    constructor(private moduleRef: ModuleRef<any>) {}
 
-    constructor(@Inject(APP_INITIALIZER) @Optional() initializers: Promise<any>[] = []) {
-        this._donePromise = Promise.all(initializers).then(() => this._done = true);
+    start() {
+        if(this.moduleRef.instance.onStart) {
+            this.moduleRef.instance.onStart(this);
+        }
     }
-
-    get done(): boolean {
-        return this.done;
-    }
-
-    get promise(): Promise<any> {
-        return this._donePromise;
-    }
-}
-
-export abstract class ApplicationRef {
-    abstract start(): Promise<any>;
 }

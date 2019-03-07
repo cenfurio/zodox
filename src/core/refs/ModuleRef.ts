@@ -3,9 +3,9 @@ import { Injector } from "../di";
 import { LifecylceFlag } from "../resolvers/LifecycleResolver";
 import { LifecycleService } from "../services/LifecycleService";
 
-export class ModuleRef implements Destroyable {
+export class ModuleRef<T> implements Destroyable {
 
-    public instance: any;
+    public instance: T;
     public injector: Injector;
 
     // get auth() {
@@ -20,18 +20,19 @@ export class ModuleRef implements Destroyable {
 
     constructor(readonly summary: any, parentInjector: Injector) {
 
+        console.log(summary.providers);
+
         this.injector = Injector.resolveAndCreate([
             ...this.summary.providers,
-            this.summary.type.reference,
             {
                 provide: ModuleRef,
                 useValue: this
             }, 
         ], parentInjector);
 
-        this.instance = this.injector.get(this.summary.type.reference);
+        this.instance = this.injector.get(this.summary.type);
 
-        this.injector.get(LifecycleService)!.registerModule(this);
+        //this.injector.get(LifecycleService)!.registerModule(this);
         // if(this.summary.type.lifecycleFlags & LifecylceFlag.OnInit) {
         //     this.instance.onInit();
         // }

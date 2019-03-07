@@ -1,31 +1,18 @@
 import { BaseResolver } from "./BaseResolver";
 import { Type, Reflector, NoAnnotationError } from "../../common";
-import { Module } from "../annotations";
-import { ModuleMetadata } from "../metadata";
+import { Module, Inject, Optional, Injectable } from "../annotations";
+import { ModuleMetadata, TypeMetadata } from "../metadata";
+import { Injector, InjectionToken } from "../di";
 
-// const module = {
-//     name: 'MainModule',
-//     providers: [{
-//         provide: 'UserService'
-//     }],
-//     imports: [{
-//         name: 'AuthModule',
-//         providers: [{
-//             provide: 'AuthService'
-//         }],
-//         imports: [{
-//             name: 'SubAuthModule',
-//             providers: [{
-//                 provide: 'SubAuthService'
-//             }]
-//         }]
-//     }]
-// };
+export const META_RESOLVERS = new InjectionToken<BaseResolver>('List of resolvers');
 
-// console.log(module);
-
+@Injectable()
 export class ModuleResolver extends BaseResolver {
     private cache = new Map<Type<any>, any>();
+
+    constructor(@Inject(META_RESOLVERS) @Optional() private resolvers: BaseResolver[] = []) {
+        super()
+    }
 
     isSupported(type: Type<any>): boolean {
         return Reflector.hasAnnotation(type, Module);
@@ -91,6 +78,12 @@ export class ModuleResolver extends BaseResolver {
             });
         }
 
+        if(annotation.declarations) {
+            annotation.declarations.forEach(declaration => {
+                metadata.declarations.push(this.resolveDeclaration(declaration));
+            });
+        }
+
         // if(annotation.controllers) {
         //     annotation.controllers.forEach(controller => {
         //         if(!this.isController(controller)) {
@@ -110,5 +103,15 @@ export class ModuleResolver extends BaseResolver {
         this.cache.set(type, metadata);
 
         return metadata;
+    }
+
+    private resolveDeclaration<T extends TypeMetadata>(type: Type<any>): T {
+        const resolver = this.resolvers.find(r => r.isSupported(type));
+
+        if(!resolver) {
+            throw new Error(`Failed to resolve metadata of ${type.name}, did you add it's resolver to the 'META_RESOLVERS' multi provider.`);
+        }
+
+        return resolver.resolve(type) as T;
     }
 }

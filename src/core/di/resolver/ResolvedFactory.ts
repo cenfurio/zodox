@@ -2,7 +2,7 @@ import { Reflector } from "../../../common";
 
 import { NormalizedProvider } from "../providers/NormalizedProvider";
 import { ResolvedDependency } from "./ResolvedDependency";
-import { Resolver } from "./Resolver";
+import { Resolver, VisibilityFlag } from "./Resolver";
 
 export class ResolvedFactory {
     private constructor(
@@ -35,6 +35,6 @@ export class ResolvedFactory {
             return [];
         }
 
-        return dependencies.map(dep => new ResolvedDependency(dep, false));
+        return dependencies.map(dep => new ResolvedDependency(dep, false, VisibilityFlag.Default));
     }
 }

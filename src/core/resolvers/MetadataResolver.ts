@@ -5,20 +5,19 @@ import { Injectable, Inject } from '../annotations';
 import { BaseResolver } from "./BaseResolver";
 import { InjectionToken, Provider } from "../di";
 import { any } from "joi";
+import { ModuleResolver } from "./ModuleResolver";
 
-export const META_RESOLVERS = new InjectionToken<BaseResolver>('List of resolvers');
-
-class TransitiveModule {
+export class TransitiveModule {
     modules: Type<any>[] = [];
-    declarations: Type<any>[] = [];
+    declarations: TypeMetadata[] = [];
     providers: { module: Type<any>, provider: Provider<any> }[] = [];
 
     addModule(type: Type<any>) {
         this.modules.push(type);
     }
 
-    addDeclaration(type: Type<any>) {
-        this.modules.push(type);
+    addDeclaration(type: any) {
+        this.declarations.push(type);
     }
 
     addProvider(module: Type<any>, provider: Provider<any>) {
@@ -30,36 +29,36 @@ class TransitiveModule {
 export class MetadataResolver {
     private moduleCache = new Map<Type<any>, TransitiveModule>();
 
-    constructor(@Inject(META_RESOLVERS) private resolvers: BaseResolver[]) {}
+    constructor(private moduleResolver: ModuleResolver) {}
 
-    resolveMetadata<T extends TypeMetadata>(type: Type<any>): T {
-        const resolver = this.resolvers.find(r => r.isSupported(type));
+    // resolveMetadata<T extends TypeMetadata>(type: Type<any>): T {
+    //     const resolver = this.resolvers.find(r => r.isSupported(type));
 
-        if(!resolver) {
-            throw new Error(`Failed to resolve metadata of ${type.name}, did you add it's resolver to the 'META_RESOLVERS' multi provider.`);
-        }
+    //     if(!resolver) {
+    //         throw new Error(`Failed to resolve metadata of ${type.name}, did you add it's resolver to the 'META_RESOLVERS' multi provider.`);
+    //     }
 
-        return resolver.resolve(type) as T;
-    }
+    //     return resolver.resolve(type) as T;
+    // }
 
-    resolveModule(type: Type<any>) {
-        const module = this.resolveMetadata<ModuleMetadata>(type);
+    // resolveModule(type: Type<any>) {
+    //     const module = this.resolveMetadata<ModuleMetadata>(type);
 
         
-    }
+    // }
 
-    ex_getTransistiveModule(type: Type<any>): TransitiveModule {
+    ex_getTransitiveModule(type: Type<any>): TransitiveModule {
         if(this.moduleCache.has(type)) {
             return this.moduleCache.get(type)!;
         }
 
-        const metadata = this.resolveMetadata<ModuleMetadata>(type);
+        const metadata = this.moduleResolver.resolve(type);
         const result = new TransitiveModule();
 
         const providerModules = new Map<any, Set<Type<any>>>();
 
         metadata.importedModules.concat(metadata.exportedModules).forEach(module => {
-            const transitiveModule = this.ex_getTransistiveModule(module.type);
+            const transitiveModule = this.ex_getTransitiveModule(module.type);
 
             transitiveModule.modules.forEach(mod => result.addModule(mod));
             // transitiveModule.declarations.forEach(dec => result.addDeclarations(dec));
@@ -84,7 +83,7 @@ export class MetadataResolver {
             // If everything goes right this should already be cached
             // If not, welll...yea then this is an expensive thing to do twice.
             // TODO: Check whether caching works properly
-            const transitiveModule = this.ex_getTransistiveModule(module.type);
+            const transitiveModule = this.ex_getTransitiveModule(module.type);
 
             transitiveModule.declarations.forEach(dec => result.addDeclaration(dec));
         })

@@ -6,6 +6,12 @@ import { ResolvedProvider } from "./ResolvedProvider";
 import { Provider } from "../providers";
 import { InjectionKey } from '../InjectionKey';
 
+export enum VisibilityFlag {
+    Default = 0,
+    Self = 1 << 0,
+    SkipSelf = 1 << 1,
+}
+
 export class Resolver {
 
     static resolveProvider(provider: Provider<any>): ResolvedProvider {
@@ -30,7 +36,7 @@ export class Resolver {
         return params.map(param => {
             let token;
             let optional = false;
-            //let visibility: Self | SkipSelf | null = null;
+            let visibility = VisibilityFlag.Default;
 
             for(const meta of param) {
                 if(meta instanceof Function) {
@@ -42,12 +48,17 @@ export class Resolver {
                 if(meta instanceof Optional) {
                     optional = true;
                 }
-                if(meta instanceof Self || meta instanceof SkipSelf) {
-                    console.warn('[WARN]: visibility flags are not supported yet');
-                    // TODO: Add visibility flags;
+
+                // Visibility flags
+                // TODO: Warn the user if they set multiple flags, this is not supported
+                if(meta instanceof Self) {
+                    visibility = VisibilityFlag.Self
+                }
+                if(meta instanceof SkipSelf) {
+                    visibility = VisibilityFlag.SkipSelf
                 }
             }
-            return new ResolvedDependency(token, optional);
+            return new ResolvedDependency(token, optional, visibility);
         });
     }
 

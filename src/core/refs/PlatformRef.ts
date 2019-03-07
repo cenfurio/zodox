@@ -1,9 +1,10 @@
 import { Type } from "../../common";
 import { Injector, Provider } from "../di";
-import { ApplicationInitializer, ApplicationRef } from "./ApplicationRef";
+import { ApplicationRef } from "./ApplicationRef";
 import { ModuleRef } from "./ModuleRef";
-import { MetadataResolver } from "../resolvers";
+import { MetadataResolver, TransitiveModule } from "../resolvers";
 import { Injectable } from "../annotations";
+import { ApplicationInitializer } from "../ApplicationInitializer";
 
 export type PlatformFactory = (extraProviders?: Provider[]) => PlatformRef;
 
@@ -17,7 +18,7 @@ export function createPlatform(parentPlatform: PlatformFactory | null, providers
         if(parentPlatform) {
             return parentPlatform([...providers, ...extraProviders]);
         }
-
+        
         const mainInjector = Injector.resolveAndCreate([...providers, ...extraProviders]);
         const platformRef = mainInjector.get(PlatformRef);
         if(!platformRef)
@@ -34,24 +35,46 @@ export class PlatformRef {
         private injector: Injector,
         private resolver: MetadataResolver) {}
 
-    async loadModule(module: Type<any>): Promise<any> {
+    async loadModule<T>(module: Type<T>): Promise<ModuleRef<T>> {
         // const moduleMeta = this.resolver.resolveModule(module);
-        console.log(this.resolver.ex_getTransistiveModule(module));
-        return;
+        const moduleFactory = this.ex_createModuleFactory(module, this.resolver.ex_getTransitiveModule(module));
+
+        console.log(moduleFactory);
 
         // TODO: Actually use the module metadata....
-        const moduleRef = new ModuleRef(module, this.injector);
+        const moduleRef = moduleFactory(this.injector);
 
-        const appInitializer = moduleRef.injector.get(ApplicationInitializer);
+        console.log(moduleRef);
+
+        const appInitializer = moduleRef.injector.get(ApplicationInitializer, null);
+        if(!appInitializer) {
+            throw new Error('No ApplicationInitializer. Is CommonModule included?')
+        }
 
         // Wait for all app initializers to finish
         await appInitializer.promise;
 
         // Time to boot the application
-        const appRef: ApplicationRef = moduleRef.injector.get(ApplicationRef as any);
-
+        const appRef = moduleRef.injector.get(ApplicationRef, null);
+        // if(!appRef && !moduleRef.instance.onStart)
+        //     appRef.start();
+        // else if(module)
         appRef.start();
 
         return moduleRef;
+    }
+
+    private ex_createModuleFactory<T>(type: Type<T>, transitiveModule: TransitiveModule) {
+        return (parentInjector: Injector) => {
+            const moduleProviders = transitiveModule.modules.slice();
+            const declarationProviders = transitiveModule.declarations.map(dec => dec.type);
+            const providers = transitiveModule.providers.map(provider => provider.provider);
+
+            return new ModuleRef<T>({
+                type,
+                providers: [...moduleProviders, ...declarationProviders, ...providers],
+                declarations: transitiveModule.declarations
+            }, parentInjector);
+        }
     }
 }

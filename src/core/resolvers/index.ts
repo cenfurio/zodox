@@ -1,4 +1,4 @@
-export { MetadataResolver, META_RESOLVERS } from './MetadataResolver';
+export { MetadataResolver,  TransitiveModule } from './MetadataResolver';
 export { BaseResolver } from './BaseResolver';
-export { ModuleResolver } from './ModuleResolver'
+export { ModuleResolver, META_RESOLVERS } from './ModuleResolver'
 export { LifecycleHook, LifecycleResolver } from './LifecycleResolver';

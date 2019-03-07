@@ -18,7 +18,7 @@ export class ControllerRef implements Destroyable {
             useValue: this
         }, type], parentInjector);
 
-        this.instance = this.injector.get(type)
+        this.instance = this.injector.get(type);
 
         this.routes = routes.map(([propName, route]) => ({
             ...route,

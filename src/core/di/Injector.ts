@@ -2,6 +2,7 @@ import { ResolvedProvider, Resolver, ResolvedFactory } from "./resolver";
 import { InjectionKey } from "./InjectionKey";
 import { NoProviderError } from "../../common";
 import { Provider } from "./providers";
+import { VisibilityFlag } from "./resolver/Resolver";
 
 const THROW_NOT_FOUND = new Object();
 
@@ -24,8 +25,8 @@ export class Injector {
         });
     }
  
-    get<T>(key: InjectionKey<T>, fallback?: T): T {
-        return this.getByKey(key, fallback);
+    get<T>(key: InjectionKey<T>, fallback?: T | null): T {
+        return this.getByKey(key, VisibilityFlag.Default, fallback);
     }
 
     has(key: InjectionKey): boolean {
@@ -42,9 +43,13 @@ export class Injector {
         return exists;
     }
 
-    private getByKey(key: InjectionKey, fallback: any): any {
+    private getByKey(key: InjectionKey, visibility: VisibilityFlag, fallback: any): any {
         if(key === Injector) {
             return this;
+        }
+
+        if(visibility == VisibilityFlag.SkipSelf) {
+
         }
 
         // We already have a instance of this key
@@ -57,7 +62,7 @@ export class Injector {
         // Look whether the parent injector can help us
         if(!resolved) {
             if(this.parent && this.parent.has(key)) {
-                return this.parent.getByKey(key, fallback);
+                return this.parent.getByKey(key, visibility, fallback);
             }
             return this.throwOrNull(key, fallback);
         }
@@ -82,7 +87,7 @@ export class Injector {
         const { factory, dependencies } = resolvedFactory;
     
         try {
-            const deps = dependencies.map(dep => this.getByKey(dep.key, dep.optional ? null : THROW_NOT_FOUND));
+            const deps = dependencies.map(dep => this.getByKey(dep.key, dep.visibility, dep.optional ? undefined : THROW_NOT_FOUND));
             const instance = factory(...deps);
 
             // Let's cache it
