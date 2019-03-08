@@ -1,7 +1,8 @@
+import { Type, Reflector } from "@zodox/common";
 import { BaseResolver, META_RESOLVERS } from "./BaseResolver";
-import { Type, Reflector, NoAnnotationError } from "../../common";
 import { Module, Inject, Optional, Injectable } from "../annotations";
 import { ModuleMetadata, TypeMetadata } from "../metadata";
+import { NoAnnotationError } from "../errors";
 
 @Injectable()
 export class ModuleResolver {

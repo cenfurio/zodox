@@ -1,4 +1,4 @@
-import { Type } from "../../common";
+import { Type } from "@zodox/common";
 import { InjectionToken } from "../di";
 import { TypeMetadata } from "../metadata/TypeMetadata";
 
