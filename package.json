@@ -27,6 +27,7 @@
     "typescript": "^3.2.2"
   },
   "dependencies": {
+    "discord.js": "github:discordjs/discord.js",
     "hapi": "^17.8.1",
     "koa": "^2.7.0",
     "reflect-metadata": "^0.1.12"
