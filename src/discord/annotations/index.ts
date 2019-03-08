@@ -1,1 +1,0 @@
-export { DiscordModule } from './module';

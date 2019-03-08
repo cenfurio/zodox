@@ -1,1 +1,0 @@
-export { DiscordJSModule } from './DiscordJSModule';
