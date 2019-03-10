@@ -34,7 +34,7 @@ class AuthMiddleware {
 })
 class TestController {
 
-    @Get('/test')
+    // @Get('/test')
     async getSomething() {
 
     }

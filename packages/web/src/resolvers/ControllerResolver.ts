@@ -1,10 +1,10 @@
-import { Type, Reflector, NoAnnotationError } from "../../common";
-import { Controller, Route, RouteOption } from "../annotations";
-import { BaseResolver } from "../../core/resolvers/BaseResolver";
-import { ControllerMetadata } from "../metadata/ControllerMetadata";
-import { InvalidPathError } from "../errors";
+import { BaseResolver, NoAnnotationError } from "@zodox/core";
+import { Type, Reflector } from "@zodox/common";
 
-export class ControllerResolver extends BaseResolver {
+import { Controller } from "../annotations";
+import { ControllerMetadata } from "../metadata/ControllerMetadata";
+
+export class ControllerResolver extends BaseResolver<ControllerMetadata> {
     private cache = new Map<Type<any>, any>();
 
     isSupported(type: Type<any>): boolean {
@@ -31,24 +31,24 @@ export class ControllerResolver extends BaseResolver {
         
         Object.keys(propAnnotations).forEach(propKey => {
             propAnnotations[propKey].forEach(propAnnotation => {
-                if(propAnnotation instanceof Route) {
-                    if(!propAnnotation.path.startsWith('/')) {
-                        throw new InvalidPathError(propAnnotation.path);
-                    }
+                // if(propAnnotation instanceof Route) {
+                //     if(!propAnnotation.path.startsWith('/')) {
+                //         throw new InvalidPathError(propAnnotation.path);
+                //     }
 
-                    if(propAnnotation.path.length === 1) { // AKA, only a /
-                        propAnnotation.path = '';
-                    }
+                //     if(propAnnotation.path.length === 1) { // AKA, only a /
+                //         propAnnotation.path = '';
+                //     }
 
-                    // metadata.addRoute(propKey, {
-                    //     ...propAnnotation,
-                    //     path: annotation.path + propAnnotation.path
-                    // })
-                }
+                //     // metadata.addRoute(propKey, {
+                //     //     ...propAnnotation,
+                //     //     path: annotation.path + propAnnotation.path
+                //     // })
+                // }
 
-                if(propAnnotation instanceof RouteOption) {
-                    // metadata.addRouteOptions(propKey, { ...propAnnotation });
-                }
+                // if(propAnnotation instanceof RouteOption) {
+                //     // metadata.addRouteOptions(propKey, { ...propAnnotation });
+                // }
             })
         });
 

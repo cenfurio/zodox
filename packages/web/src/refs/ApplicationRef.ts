@@ -1,4 +1,4 @@
-import { ApplicationRef as _ApplicationRef } from "../../core";
+import { ApplicationRef as _ApplicationRef } from "@zodox/core";
 
 export class ApplicationRef extends _ApplicationRef {
     start(): Promise<any> {

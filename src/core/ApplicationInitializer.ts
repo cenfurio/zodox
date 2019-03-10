@@ -1,15 +1,19 @@
 import { InjectionToken } from "./di";
 import { Injectable, Inject, Optional } from "./annotations";
 
-export const APP_INITIALIZER = new InjectionToken<Promise<any>[]>('Application Initializers');
+export const APP_INITIALIZERS = new InjectionToken<Promise<any>[]>('Application Initializers');
 
 @Injectable()
 export class ApplicationInitializer {
-    private _donePromise: Promise<any>;
+    private _donePromise: Promise<any> = Promise.resolve();
     private _done = false;
 
-    constructor(@Inject(APP_INITIALIZER) @Optional() initializers: Promise<any>[] = []) {
+    constructor(@Inject(APP_INITIALIZERS) @Optional() initializers: Promise<any>[] = []) {
         this._donePromise = Promise.all(initializers).then(() => this._done = true);
+    }
+
+    initialize() {
+
     }
 
     get done(): boolean {

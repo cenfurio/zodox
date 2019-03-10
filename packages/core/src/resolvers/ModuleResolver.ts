@@ -8,7 +8,7 @@ import { NoAnnotationError } from "../errors";
 export class ModuleResolver {
     private cache = new Map<Type<any>, any>();
 
-    constructor(@Inject(META_RESOLVERS) @Optional() private resolvers: BaseResolver[] = []) {}
+    constructor(@Inject(META_RESOLVERS) @Optional() private resolvers: BaseResolver<any>[] = []) {}
 
     isSupported(type: Type<any>): boolean {
         return Reflector.hasAnnotation(type, Module);

@@ -1,9 +1,8 @@
-import { WebModule } from "../../annotations";
-import { ModuleWithProviders } from "../../../core/annotations";
-import { ApplicationModule } from "../../../core/ApplicationModule";
+import { ModuleWithProviders, ApplicationModule, APP_INITIALIZER } from "@zodox/core";
+
 import { Server, ServerConfig, SERVER_CONFIG } from "../common";
+import { WebModule } from "../../annotations";
 import { KoaServer } from "./KoaServer";
-import { APP_INITIALIZER } from "../../../core/ApplicationInitializer";
 
 async function serverInitializer(server: Server) {
     await server.listen();

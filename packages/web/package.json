@@ -6,6 +6,7 @@
   "homepage": "https://github.com/cenfurio/zodox/tree/master/packages/web#readme",
   "license": "MIT",
   "main": "lib/index.js",
+  "module": "lib/index.js",
   "typings": "lib/index.d.ts",
   "directories": {
     "lib": "lib",
@@ -22,13 +23,17 @@
     "url": "git+https://github.com/cenfurio/zodox.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
     "url": "https://github.com/cenfurio/zodox/issues"
   },
   "dependencies": {
-    "@zodox/core": "1.0.0"
+    "@zodox/core": "1.0.0",
+    "koa": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.0.48"
   }
 }

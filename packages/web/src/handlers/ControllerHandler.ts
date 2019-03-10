@@ -1,5 +1,4 @@
 import { DeclarationHandler, TypeMetadata } from "@zodox/core";
-import { Type } from "@zodox/common";
 import { ControllerMetadata } from "../metadata/ControllerMetadata";
 
 export class ControllerHandler extends DeclarationHandler<ControllerMetadata> {
