@@ -1,6 +1,6 @@
 {
   "name": "@zodox/core",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "This is the core of the Zodox framework",
   "author": "paulhobbel <itsdizzy40@gmail.com>",
   "homepage": "https://github.com/cenfurio/zodox/tree/master/packages/core#readme",
@@ -30,6 +30,6 @@
     "url": "https://github.com/cenfurio/zodox/issues"
   },
   "dependencies": {
-    "@zodox/common": "1.0.0"
+    "@zodox/common": "2.0.0"
   }
 }

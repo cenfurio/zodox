@@ -1,1 +1,0 @@
-export { KoaModule } from './KoaModule';

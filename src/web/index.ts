@@ -1,1 +1,0 @@
-export { Controller, Route, Delete, Get, Patch, Post, Put, Auth, Payload, Validate } from './annotations';

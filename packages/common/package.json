@@ -1,6 +1,6 @@
 {
   "name": "@zodox/common",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "This contains common functionality used throughout the Zodox framework",
   "author": "paulhobbel <itsdizzy40@gmail.com>",
   "homepage": "https://github.com/cenfurio/zodox/tree/master/packages/common#readme",
